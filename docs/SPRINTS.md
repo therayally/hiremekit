@@ -21,13 +21,27 @@ Sprints are scoped, shippable units. No time frames. Each Sprint ends with a dep
 - Email verification
 - MFA stub (for Studio tier)
 
-## Sprint 3 — Resume engine
+## Sprint 3 — Resume engine + ingest
 - Upload (PDF/DOCX/TXT)
 - Parse (pdf-parse, mammoth)
 - Tailor via MiniMax
 - Score via MiniMax
 - ATS PDF + Fancy PDF (Puppeteer)
 - DOCX export
+
+### Ingest surface (Sprint 3.5 — extends Sprint 3)
+The "drop your stuff in" intake. The fastest possible path from "I have nothing prepared" to "I have a draft resume."
+- **File upload**: PDF, DOCX, DOC, TXT, RTF, MD, HTML, ODT, PNG/JPG/HEIC (OCR via tesseract.js), handwritten (OCR + AI cleanup)
+- **Paste**: raw text, LinkedIn PDF export, job history bullets
+- **Voice / mic**: Web Speech API → live transcript → AI structurer turns "I worked at Google for 3 years as a PM on Android Auto" into a structured bullet
+- **AI interview**: 8-12 questions asked by the AI ("Walk me through your last role" → "What was the impact?" → "How did you measure it?"). Saves the Q&A, builds the resume from answers.
+- **Free-form notes**: textarea where user brain-dumps anything. AI extracts: jobs, dates, skills, education, projects.
+- **LinkedIn URL**: paste profile URL → fetch public data → parse to resume schema
+- **Import existing website**: paste URL of personal site / portfolio / about.me / GitHub profile → scrape → structure
+- **Social handles** (optional): Threads, X, GitHub, Dribbble, Behance, Medium → fetch recent posts → enrich "About" section with voice
+- **Old resume photo**: OCR scan of a photographed/scanned paper resume (the "I lost my Word file" case)
+
+All paths converge to the same internal `Resume` schema.
 
 ## Sprint 4 — Cover letter + signature + LinkedIn
 - Cover letter generator (3 lengths)

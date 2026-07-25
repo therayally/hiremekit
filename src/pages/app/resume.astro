@@ -1,0 +1,656 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Resume — HireMeKit" description="Drop your resume in. We'll handle the rest.">
+  <div class="page-head">
+    <h1>Build your resume</h1>
+    <p>Drop a file, paste text, talk out loud, or just answer a few questions. Whatever you have, we'll turn it into a tailored resume.</p>
+  </div>
+
+  <!-- Ingest tabs -->
+  <div class="ingest-panel">
+    <div class="tabs" role="tablist">
+      <button class="tab tab-active" data-tab="file" role="tab" aria-selected="true">Upload file</button>
+      <button class="tab" data-tab="text" role="tab">Paste text</button>
+      <button class="tab" data-tab="voice" role="tab">Voice</button>
+      <button class="tab" data-tab="interview" role="tab">Interview</button>
+      <button class="tab" data-tab="notes" role="tab">Notes</button>
+      <button class="tab" data-tab="linkedin" role="tab">LinkedIn</button>
+      <button class="tab" data-tab="json" role="tab">JSON Resume</button>
+    </div>
+
+    <!-- FILE -->
+    <div class="tab-panel tab-panel-active" data-tab-panel="file">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md,.rtf,.html,.htm" hidden />
+        <div class="dropzone-content">
+          <div class="dropzone-icon">PDF</div>
+          <p class="dropzone-text">Drop your resume here, or <button type="button" id="browse-btn" class="link-btn">browse</button></p>
+          <p class="dropzone-hint">PDF, DOCX, TXT, MD, RTF, HTML up to 5MB</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEXT -->
+    <div class="tab-panel" data-tab-panel="text">
+      <label for="text-input" class="field-label">Paste your resume, job history, or anything</label>
+      <textarea id="text-input" rows="12" placeholder="Senior Product Manager at Google (2020-2023). Led Android Auto team of 8 engineers. Shipped 4 major releases. Increased DAU by 35%..."></textarea>
+      <button class="btn btn-primary" id="text-submit">Turn into resume</button>
+    </div>
+
+    <!-- VOICE -->
+    <div class="tab-panel" data-tab-panel="voice">
+      <div class="voice-stage">
+        <button class="voice-btn" id="voice-btn" type="button" aria-label="Start recording">
+          <span class="voice-pulse"></span>
+          <span class="voice-label">Tap to talk</span>
+        </button>
+        <p class="voice-hint">Tell us about your career. We'll structure it as we go.</p>
+      </div>
+      <label for="voice-transcript" class="field-label">Live transcript</label>
+      <textarea id="voice-transcript" rows="10" placeholder="Your words will appear here. Edit before submitting."></textarea>
+      <button class="btn btn-primary" id="voice-submit" disabled>Turn into resume</button>
+    </div>
+
+    <!-- INTERVIEW -->
+    <div class="tab-panel" data-tab-panel="interview">
+      <div id="interview-stage">
+        <div class="interview-progress">
+          <span id="interview-count">Question 1 of 8</span>
+          <div class="interview-bar"><div class="interview-bar-fill" id="interview-bar-fill"></div></div>
+        </div>
+        <div class="interview-card">
+          <p class="interview-q" id="interview-q">Walk me through your most recent role.</p>
+          <textarea id="interview-a" rows="5" placeholder="Type your answer here..."></textarea>
+          <div class="interview-actions">
+            <button class="btn btn-secondary" id="interview-skip">Skip</button>
+            <button class="btn btn-primary" id="interview-next">Next question</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="tab-panel" data-tab-panel="notes">
+      <label for="notes-input" class="field-label">Brain dump whatever you have</label>
+      <p class="field-sub">Job titles, dates, names, skills, projects. Doesn't have to be a resume. Messy is fine.</p>
+      <textarea id="notes-input" rows="12" placeholder="Started at Apple in 2019 as iOS engineer. Moved to Stripe in 2021. Lead PM for checkout. MBA from Wharton. Know Python, Swift, SQL..."></textarea>
+      <button class="btn btn-primary" id="notes-submit">Structure my notes</button>
+    </div>
+
+    <!-- LINKEDIN -->
+    <div class="tab-panel" data-tab-panel="linkedin">
+      <p class="panel-text">LinkedIn blocks automated access. Instead, export your profile as PDF:</p>
+      <ol class="steps-list">
+        <li>Open your LinkedIn profile</li>
+        <li>Click "More" in the intro section</li>
+        <li>Choose "Save as PDF"</li>
+        <li>Upload the PDF file in the Upload tab</li>
+      </ol>
+      <p class="panel-text">Or paste your About section and any experience text below:</p>
+      <textarea id="linkedin-paste" rows="10" placeholder="Paste your LinkedIn About section here..."></textarea>
+      <button class="btn btn-primary" id="linkedin-submit">Turn into resume</button>
+    </div>
+
+    <!-- JSON RESUME -->
+    <div class="tab-panel" data-tab-panel="json">
+      <label for="json-input" class="field-label">Paste JSON Resume</label>
+      <p class="field-sub">Compatible with <a href="https://jsonresume.org" target="_blank" rel="noopener">jsonresume.org</a> schema. Many tools export this.</p>
+      <textarea id="json-input" rows="12" placeholder='{ "basics": { "name": "Ada Lovelace", "email": "ada@example.com" }, "work": [...] }'></textarea>
+      <button class="btn btn-primary" id="json-submit">Import JSON Resume</button>
+    </div>
+
+    <div id="status" class="status" hidden></div>
+  </div>
+
+  <!-- Preview -->
+  <div id="preview" class="preview" hidden>
+    <div class="preview-head">
+      <h2>Your draft resume</h2>
+      <p class="preview-sub">Review, edit, then tailor it to a specific job.</p>
+    </div>
+    <div class="preview-actions">
+      <button class="btn btn-secondary" id="preview-edit">Edit fields</button>
+      <button class="btn btn-primary" id="preview-tailor">Tailor to a job</button>
+    </div>
+    <pre id="preview-output" class="preview-output"></pre>
+  </div>
+</AppLayout>
+
+<script>
+  // ===== State =====
+  const state = {
+    resume: null as any,
+    interview: {
+      questions: [
+        'Walk me through your most recent role.',
+        'What were your top 3 accomplishments in that role?',
+        'What did you do before that?',
+        'What made you switch?',
+        'Where did you go to school? What did you study?',
+        'What skills do you use most in your work?',
+        'Do you have any side projects, certifications, or awards?',
+        'What kind of role are you looking for next?',
+      ],
+      index: 0,
+      answers: [] as Array<{ question: string; answer: string }>,
+    },
+  };
+
+  // ===== Tabs =====
+  document.querySelectorAll<HTMLButtonElement>('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((t) => {
+        t.classList.remove('tab-active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('tab-panel-active'));
+      tab.classList.add('tab-active');
+      tab.setAttribute('aria-selected', 'true');
+      const panel = document.querySelector(`.tab-panel[data-tab-panel="${tab.dataset.tab}"]`);
+      panel?.classList.add('tab-panel-active');
+    });
+  });
+
+  // ===== Status =====
+  const status = document.getElementById('status') as HTMLDivElement;
+  function showStatus(msg: string, kind: 'info' | 'error' | 'ok' = 'info') {
+    status.textContent = msg;
+    status.className = `status status-${kind}`;
+    status.hidden = false;
+  }
+
+  // ===== File upload =====
+  const dropzone = document.getElementById('dropzone') as HTMLDivElement;
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn = document.getElementById('browse-btn') as HTMLButtonElement;
+
+  browseBtn.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('click', (e) => {
+    if (e.target === browseBtn) return;
+    fileInput.click();
+  });
+
+  ;['dragenter', 'dragover'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+  });
+  ;['dragleave', 'drop'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', async (e) => {
+    const files = (e as DragEvent).dataTransfer?.files;
+    if (files?.[0]) await uploadFile(files[0]);
+  });
+  fileInput.addEventListener('change', async () => {
+    if (fileInput.files?.[0]) await uploadFile(fileInput.files[0]);
+  });
+
+  async function uploadFile(file: File) {
+    showStatus(`Uploading ${file.name}...`, 'info');
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch('/api/ingest', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.ok) {
+        showStatus(data.error ?? 'Upload failed.', 'error');
+        return;
+      }
+      showResume(data.resume);
+    } catch (err) {
+      showStatus('Network error. Try again.', 'error');
+    }
+  }
+
+  // ===== Text =====
+  document.getElementById('text-submit')?.addEventListener('click', async () => {
+    const text = (document.getElementById('text-input') as HTMLTextAreaElement).value.trim();
+    if (text.length < 50) {
+      showStatus('Add a bit more text so we can work with it.', 'error');
+      return;
+    }
+    await postIngest({ type: 'text', text });
+  });
+
+  // ===== Voice =====
+  const voiceBtn = document.getElementById('voice-btn') as HTMLButtonElement;
+  const voiceTranscript = document.getElementById('voice-transcript') as HTMLTextAreaElement;
+  const voiceSubmit = document.getElementById('voice-submit') as HTMLButtonElement;
+  let recognition: any = null;
+  let isRecording = false;
+
+  function initVoice() {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      voiceBtn.disabled = true;
+      showStatus('Voice input requires Chrome, Edge, or Safari.', 'error');
+      return;
+    }
+    recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onresult = (e: any) => {
+      let interim = '';
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t + ' ';
+        else interim += t;
+      }
+      if (final) voiceTranscript.value += final;
+      voiceSubmit.disabled = !voiceTranscript.value.trim();
+      // Update interim softly by showing a hint
+      if (interim) voiceTranscript.dataset.interim = interim;
+    };
+  }
+  initVoice();
+
+  voiceBtn.addEventListener('click', () => {
+    if (!recognition) return;
+    if (isRecording) {
+      recognition.stop();
+      isRecording = false;
+      voiceBtn.classList.remove('recording');
+      voiceBtn.querySelector('.voice-label')!.textContent = 'Tap to talk';
+    } else {
+      recognition.start();
+      isRecording = true;
+      voiceBtn.classList.add('recording');
+      voiceBtn.querySelector('.voice-label')!.textContent = 'Listening... tap to stop';
+    }
+  });
+
+  voiceSubmit.addEventListener('click', async () => {
+    const t = voiceTranscript.value.trim();
+    if (t.length < 20) {
+      showStatus('Speak a bit more first.', 'error');
+      return;
+    }
+    await postIngest({ type: 'voice', transcript: t });
+  });
+
+  // ===== Interview =====
+  const interviewQ = document.getElementById('interview-q') as HTMLParagraphElement;
+  const interviewA = document.getElementById('interview-a') as HTMLTextAreaElement;
+  const interviewCount = document.getElementById('interview-count') as HTMLSpanElement;
+  const interviewBarFill = document.getElementById('interview-bar-fill') as HTMLDivElement;
+  const interviewNext = document.getElementById('interview-next') as HTMLButtonElement;
+  const interviewSkip = document.getElementById('interview-skip') as HTMLButtonElement;
+
+  function renderInterview() {
+    const i = state.interview.index;
+    const total = state.interview.questions.length;
+    interviewQ.textContent = state.interview.questions[i];
+    interviewCount.textContent = `Question ${i + 1} of ${total}`;
+    interviewBarFill.style.width = `${((i + 1) / total) * 100}%`;
+    interviewA.value = '';
+  }
+  renderInterview();
+
+  interviewNext.addEventListener('click', () => {
+    const ans = interviewA.value.trim();
+    if (ans.length > 0) {
+      state.interview.answers.push({
+        question: state.interview.questions[state.interview.index],
+        answer: ans,
+      });
+    }
+    if (state.interview.index >= state.interview.questions.length - 1) {
+      if (state.interview.answers.length < 3) {
+        showStatus('Answer at least 3 questions to build a resume.', 'error');
+        return;
+      }
+      postIngest({ type: 'interview', answers: state.interview.answers });
+      return;
+    }
+    state.interview.index++;
+    renderInterview();
+  });
+
+  interviewSkip.addEventListener('click', () => {
+    if (state.interview.index >= state.interview.questions.length - 1) {
+      if (state.interview.answers.length < 3) {
+        showStatus('Answer at least 3 questions to build a resume.', 'error');
+        return;
+      }
+      postIngest({ type: 'interview', answers: state.interview.answers });
+      return;
+    }
+    state.interview.index++;
+    renderInterview();
+  });
+
+  // ===== Notes =====
+  document.getElementById('notes-submit')?.addEventListener('click', async () => {
+    const text = (document.getElementById('notes-input') as HTMLTextAreaElement).value.trim();
+    if (text.length < 20) {
+      showStatus('Add a few more notes.', 'error');
+      return;
+    }
+    await postIngest({ type: 'notes', text });
+  });
+
+  // ===== LinkedIn =====
+  document.getElementById('linkedin-submit')?.addEventListener('click', async () => {
+    const text = (document.getElementById('linkedin-paste') as HTMLTextAreaElement).value.trim();
+    if (text.length < 50) {
+      showStatus('Paste your LinkedIn About section and experience.', 'error');
+      return;
+    }
+    await postIngest({ type: 'text', text });
+  });
+
+  // ===== JSON Resume =====
+  document.getElementById('json-submit')?.addEventListener('click', async () => {
+    const json = (document.getElementById('json-input') as HTMLTextAreaElement).value.trim();
+    if (json.length < 2) {
+      showStatus('Paste your JSON Resume.', 'error');
+      return;
+    }
+    try {
+      JSON.parse(json);
+    } catch {
+      showStatus('Invalid JSON.', 'error');
+      return;
+    }
+    await postIngest({ type: 'json', json });
+  });
+
+  // ===== Generic ingest =====
+  async function postIngest(body: any) {
+    showStatus('Structuring your resume...', 'info');
+    try {
+      const res = await fetch('/api/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        showStatus(data.error ?? 'Failed.', 'error');
+        return;
+      }
+      showResume(data.resume);
+    } catch {
+      showStatus('Network error. Try again.', 'error');
+    }
+  }
+
+  // ===== Preview =====
+  function showResume(resume: any) {
+    state.resume = resume;
+    showStatus('Resume ready.', 'ok');
+    const preview = document.getElementById('preview') as HTMLDivElement;
+    const out = document.getElementById('preview-output') as HTMLPreElement;
+    preview.hidden = false;
+    out.textContent = JSON.stringify(resume, null, 2);
+    preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-7);
+  }
+  .page-head h1 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-2);
+  }
+  .page-head p {
+    font-size: var(--text-base);
+    max-width: 640px;
+  }
+
+  .ingest-panel {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    background: var(--color-bg-section);
+  }
+  .tab {
+    background: none;
+    border: none;
+    padding: var(--space-4) var(--space-5);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 120ms, border-color 120ms;
+  }
+  .tab:hover { color: var(--color-fg); }
+  .tab-active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+    background: var(--color-bg);
+  }
+
+  .tab-panel {
+    display: none;
+    padding: var(--space-6);
+  }
+  .tab-panel-active { display: block; }
+
+  .field-label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+  }
+  .field-sub {
+    font-size: var(--text-sm);
+    color: var(--color-fg-muted);
+    margin-bottom: var(--space-3);
+  }
+  .panel-text {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+  }
+
+  .dropzone {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-9) var(--space-5);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 120ms, background 120ms;
+  }
+  .dropzone:hover { border-color: var(--color-accent); background: rgba(0, 113, 227, 0.02); }
+  .dropzone.dragover {
+    border-color: var(--color-accent);
+    background: rgba(0, 113, 227, 0.06);
+  }
+  .dropzone-icon {
+    display: inline-block;
+    background: var(--color-bg-section);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+  }
+  .dropzone-text {
+    font-size: var(--text-base);
+    margin: 0 0 var(--space-2);
+  }
+  .dropzone-hint {
+    font-size: var(--text-xs);
+    color: var(--color-fg-subtle);
+    margin: 0;
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    text-decoration: underline;
+  }
+
+  .voice-stage {
+    text-align: center;
+    padding: var(--space-7) 0;
+  }
+  .voice-btn {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms, background 120ms;
+  }
+  .voice-btn:hover { transform: scale(1.04); }
+  .voice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .voice-btn.recording { background: var(--color-danger); }
+  .voice-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--color-accent);
+    opacity: 0.3;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .voice-btn.recording .voice-pulse { background: var(--color-danger); }
+  .voice-label {
+    position: relative;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-align: center;
+    padding: 0 var(--space-2);
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 0; }
+  }
+  .voice-hint {
+    font-size: var(--text-sm);
+    color: var(--color-fg-muted);
+    margin-top: var(--space-4);
+  }
+
+  .interview-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+  .interview-progress #interview-count {
+    font-size: var(--text-xs);
+    color: var(--color-fg-muted);
+    white-space: nowrap;
+  }
+  .interview-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--color-bg-section);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .interview-bar-fill {
+    height: 100%;
+    background: var(--color-accent);
+    width: 12.5%;
+    transition: width 200ms ease;
+  }
+  .interview-card {
+    background: var(--color-bg-section);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .interview-q {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin: 0 0 var(--space-4);
+    color: var(--color-fg);
+  }
+  .interview-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    margin-top: var(--space-4);
+  }
+
+  .steps-list {
+    margin: 0 0 var(--space-5) var(--space-5);
+    padding: 0;
+  }
+  .steps-list li {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+  }
+
+  .status {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+  .status-info {
+    background: rgba(0, 113, 227, 0.08);
+    border: 1px solid rgba(0, 113, 227, 0.2);
+    color: var(--color-accent);
+  }
+  .status-ok {
+    background: rgba(0, 135, 90, 0.08);
+    border: 1px solid rgba(0, 135, 90, 0.2);
+    color: var(--color-success);
+  }
+  .status-error {
+    background: rgba(217, 45, 32, 0.08);
+    border: 1px solid rgba(217, 45, 32, 0.2);
+    color: var(--color-danger);
+  }
+
+  .preview {
+    margin-top: var(--space-7);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+  .preview-head h2 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-2);
+  }
+  .preview-sub {
+    font-size: var(--text-sm);
+  }
+  .preview-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin: var(--space-5) 0;
+  }
+  .preview-output {
+    background: var(--color-bg-section);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    overflow: auto;
+    max-height: 480px;
+    margin: 0;
+  }
+</style>
