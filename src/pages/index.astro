@@ -1,0 +1,421 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const features = [
+  {
+    title: 'Resume tailoring',
+    body: 'Paste a job description. Your resume rewrites itself to match. ATS-safe PDF, fancy PDF, or DOCX.',
+  },
+  {
+    title: 'Cover letters',
+    body: 'Three lengths. Personalized to the role. Ready to send in seconds.',
+  },
+  {
+    title: 'Email signatures',
+    body: 'Clean, professional signature blocks for Gmail, Outlook, and Apple Mail.',
+  },
+  {
+    title: 'LinkedIn optimizer',
+    body: 'Rewrite your headline and About section. Generate banners in four sizes.',
+  },
+  {
+    title: 'Skills assessment',
+    body: 'Twenty questions per role. Get a skill profile, gaps, and a learning roadmap.',
+  },
+  {
+    title: 'Portfolio site (Studio)',
+    body: 'Drag-drop builder with ten templates. Free hosting on yourname.hiremekit.app.',
+  },
+];
+
+const pricing = [
+  {
+    name: 'Free',
+    price: '$0',
+    period: '',
+    description: 'See your match score before you pay.',
+    features: [
+      '1 resume score',
+      'Top 5 missing keywords',
+      'No PDF export',
+    ],
+    cta: 'Start free',
+    href: '/signup',
+  },
+  {
+    name: 'Pro',
+    price: '$9.99',
+    period: 'once',
+    description: 'Everything you need to land the interview.',
+    features: [
+      'Unlimited resume tailoring',
+      '20 templates (ATS + artistic)',
+      'Cover letters, signature, LinkedIn',
+      'Skills assessment',
+      'ATS PDF, Fancy PDF, DOCX export',
+    ],
+    cta: 'Get Pro',
+    href: '/signup?plan=pro',
+    highlight: true,
+  },
+  {
+    name: 'Studio',
+    price: '$39',
+    period: 'once',
+    description: 'Pro plus a portfolio site and design tools.',
+    features: [
+      'Everything in Pro',
+      'Portfolio site builder',
+      'Free hosting on hiremekit.app subdomain',
+      'Custom domain support',
+      'Business card generator',
+      'Logo generator',
+    ],
+    cta: 'Get Studio',
+    href: '/signup?plan=studio',
+  },
+];
+---
+
+<BaseLayout
+  title="HireMeKit — Everything you need to get hired. $9.99 once."
+  description="Tailor your resume to any job. Generate cover letters, LinkedIn rewrites, email signatures. Build a portfolio. $9.99 once, no subscription."
+>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <p class="hero-eyebrow">Built for job seekers who are tired of guessing</p>
+      <h1 class="hero-title">Everything you need to get hired.</h1>
+      <p class="hero-subtitle">Tailor your resume to any job. Generate cover letters, signatures, LinkedIn rewrites. Build a portfolio. All for $9.99, once.</p>
+      <div class="hero-actions">
+        <a href="/signup" class="btn btn-primary btn-lg">Get started for $9.99</a>
+        <a href="/#features" class="btn btn-secondary btn-lg">See what is included</a>
+      </div>
+      <p class="hero-meta">No subscription. No card required for free tier.</p>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section class="trust">
+    <div class="container">
+      <div class="trust-grid">
+        <div>
+          <div class="trust-num">$9.99</div>
+          <div class="trust-label">Lifetime price</div>
+        </div>
+        <div>
+          <div class="trust-num">20</div>
+          <div class="trust-label">Resume templates</div>
+        </div>
+        <div>
+          <div class="trust-num">3</div>
+          <div class="trust-label">Export formats</div>
+        </div>
+        <div>
+          <div class="trust-num">SOC2</div>
+          <div class="trust-label">Security baseline</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <h2>One kit. Six tools. No subscription.</h2>
+        <p>Every piece you need to apply, interview, and stand out.</p>
+      </div>
+      <div class="grid grid-3">
+        {features.map((f) => (
+          <article class="feature">
+            <h3>{f.title}</h3>
+            <p>{f.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section how-it-works">
+    <div class="container">
+      <div class="section-head">
+        <h2>How it works</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Upload your resume</h4>
+          <p>PDF, DOCX, or plain text. We parse it locally and never sell your data.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>Paste a job description</h4>
+          <p>Copy from LinkedIn, Indeed, or anywhere. We extract the keywords that matter.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>Get a tailored resume</h4>
+          <p>Your bullets re-order, keywords align, and your match score goes up. Export as ATS PDF, Fancy PDF, or DOCX.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-head">
+        <h2>Pricing</h2>
+        <p>Pay once. Use forever. No subscription.</p>
+      </div>
+      <div class="grid grid-3 pricing-grid">
+        {pricing.map((tier) => (
+          <article class={`price-card ${tier.highlight ? 'price-card-highlight' : ''}`}>
+            {tier.highlight && <div class="price-badge">Most popular</div>}
+            <h3>{tier.name}</h3>
+            <div class="price">
+              <span class="price-amount">{tier.price}</span>
+              {tier.period && <span class="price-period"> {tier.period}</span>}
+            </div>
+            <p class="price-desc">{tier.description}</p>
+            <ul class="price-features">
+              {tier.features.map((f) => <li>{f}</li>)}
+            </ul>
+            <a href={tier.href} class={`btn ${tier.highlight ? 'btn-primary' : 'btn-secondary'} btn-full`}>{tier.cta}</a>
+          </article>
+        ))}
+      </div>
+      <p class="pricing-foot">All prices in USD. Lifetime access. 30-day money-back guarantee.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container">
+      <h2>Stop guessing. Start getting interviews.</h2>
+      <p>Join job seekers who tailor, not spray and pray.</p>
+      <a href="/signup" class="btn btn-primary btn-lg">Get HireMeKit for $9.99</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: var(--space-9) 0 var(--space-8);
+    text-align: center;
+  }
+  .hero-eyebrow {
+    font-size: var(--text-sm);
+    color: var(--color-fg-muted);
+    margin-bottom: var(--space-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hero-title {
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-4);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-fg-muted);
+    max-width: 720px;
+    margin: 0 auto var(--space-6);
+    line-height: 1.4;
+  }
+  .hero-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+  }
+  .btn-lg {
+    padding: 16px 28px;
+    font-size: var(--text-base);
+  }
+  .hero-meta {
+    font-size: var(--text-sm);
+    color: var(--color-fg-subtle);
+  }
+
+  .trust {
+    background: var(--color-bg-section);
+    padding: var(--space-7) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    text-align: center;
+  }
+  @media (max-width: 640px) {
+    .trust-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .trust-num {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-1);
+  }
+  .trust-label {
+    font-size: var(--text-sm);
+    color: var(--color-fg-muted);
+  }
+
+  .section-head {
+    text-align: center;
+    margin-bottom: var(--space-7);
+  }
+  .section-head h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  .feature {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+  .feature h3 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+  }
+  .feature p {
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .how-it-works {
+    background: var(--color-bg-section);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+  @media (max-width: 768px) {
+    .steps { grid-template-columns: 1fr; }
+  }
+  .step {
+    text-align: center;
+    padding: var(--space-5);
+  }
+  .step-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-4);
+  }
+  .step h4 {
+    margin-bottom: var(--space-2);
+  }
+  .step p {
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .pricing-grid {
+    align-items: stretch;
+  }
+  .price-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .price-card-highlight {
+    border-color: var(--color-accent);
+    border-width: 2px;
+    box-shadow: var(--shadow-md);
+  }
+  .price-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-accent);
+    color: #fff;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+  }
+  .price-card h3 {
+    margin-bottom: var(--space-3);
+  }
+  .price {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: var(--space-3);
+  }
+  .price-amount {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .price-period {
+    font-size: var(--text-sm);
+    color: var(--color-fg-muted);
+  }
+  .price-desc {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-5);
+  }
+  .price-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-6);
+    flex: 1;
+  }
+  .price-features li {
+    font-size: var(--text-sm);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-fg);
+  }
+  .price-features li:last-child {
+    border-bottom: none;
+  }
+  .btn-full {
+    width: 100%;
+    text-align: center;
+  }
+  .pricing-foot {
+    text-align: center;
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--color-fg-subtle);
+  }
+
+  .cta {
+    background: var(--color-bg-section);
+    padding: var(--space-9) 0;
+    text-align: center;
+  }
+  .cta h2 {
+    margin-bottom: var(--space-3);
+  }
+  .cta p {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-6);
+  }
+</style>

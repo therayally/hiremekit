@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Sign in — HireMeKit" noIndex={true}>
+  <section class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Sign in to tailor your next application.</p>
+
+        <form id="login-form" class="auth-form">
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Sign in</button>
+          <p class="auth-foot">
+            <a href="/forgot">Forgot password?</a>
+          </p>
+          <p class="auth-foot">
+            New here? <a href="/signup">Create an account</a>
+          </p>
+        </form>
+
+        <div id="form-error" class="error" hidden></div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const errorEl = document.getElementById('form-error') as HTMLDivElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    const fd = new FormData(form);
+    const body = {
+      email: String(fd.get('email') ?? '').trim(),
+      password: String(fd.get('password') ?? ''),
+    };
+
+    const btn = form.querySelector('button[type=submit]') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        errorEl.textContent = data.error ?? 'Invalid email or password.';
+        errorEl.hidden = false;
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+        return;
+      }
+
+      window.location.href = '/app';
+    } catch {
+      errorEl.textContent = 'Network error. Try again.';
+      errorEl.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  });
+</script>
+
+<style>
+  .auth-page { padding: var(--space-9) 0; min-height: calc(100vh - 200px); }
+  .auth-container { max-width: 480px; margin: 0 auto; padding: 0 var(--space-5); }
+  .auth-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-7);
+  }
+  .auth-card h1 { font-size: var(--text-2xl); margin-bottom: var(--space-2); }
+  .auth-sub { color: var(--color-fg-muted); margin-bottom: var(--space-6); }
+  .auth-form { display: flex; flex-direction: column; gap: var(--space-5); }
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field label { font-size: var(--text-sm); font-weight: 600; }
+  .btn-full { width: 100%; }
+  .auth-foot { text-align: center; font-size: var(--text-sm); margin: 0; }
+  .error {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(217, 45, 32, 0.1);
+    border: 1px solid rgba(217, 45, 32, 0.3);
+    color: var(--color-danger);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+</style>

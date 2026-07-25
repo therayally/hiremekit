@@ -1,0 +1,241 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Read ?plan= to default the right tier
+const plan = Astro.url.searchParams.get('plan') ?? 'pro';
+---
+
+<BaseLayout title="Sign up — HireMeKit" noIndex={true}>
+  <section class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1>Create your account</h1>
+        <p class="auth-sub">Get tailored in 60 seconds.</p>
+
+        <form id="signup-form" class="auth-form" autocomplete="on">
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              minlength="12"
+              autocomplete="new-password"
+              placeholder="At least 12 characters"
+            />
+            <p class="field-hint">12+ characters. Use a passphrase you will remember.</p>
+          </div>
+
+          <fieldset class="plan-picker">
+            <legend>Choose a plan</legend>
+            <label class={`plan-option ${plan === 'free' ? 'plan-selected' : ''}`}>
+              <input type="radio" name="plan" value="free" checked={plan === 'free'} />
+              <div>
+                <strong>Free</strong>
+                <span>See your match score</span>
+              </div>
+              <span class="plan-price">$0</span>
+            </label>
+            <label class={`plan-option ${plan === 'pro' ? 'plan-selected' : ''}`}>
+              <input type="radio" name="plan" value="pro" checked={plan === 'pro'} />
+              <div>
+                <strong>Pro</strong>
+                <span>Everything to land the interview</span>
+              </div>
+              <span class="plan-price">$9.99</span>
+            </label>
+            <label class={`plan-option ${plan === 'studio' ? 'plan-selected' : ''}`}>
+              <input type="radio" name="plan" value="studio" checked={plan === 'studio'} />
+              <div>
+                <strong>Studio</strong>
+                <span>Pro plus portfolio site</span>
+              </div>
+              <span class="plan-price">$39</span>
+            </label>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary btn-full">Create account</button>
+
+          <p class="auth-foot">
+            Already have an account? <a href="/login">Sign in</a>
+          </p>
+
+          <p class="legal">
+            By creating an account you agree to our
+            <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+          </p>
+        </form>
+
+        <div id="form-error" class="error" hidden></div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('signup-form') as HTMLFormElement;
+  const errorEl = document.getElementById('form-error') as HTMLDivElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    const fd = new FormData(form);
+    const body = {
+      email: String(fd.get('email') ?? '').trim(),
+      password: String(fd.get('password') ?? ''),
+      plan: String(fd.get('plan') ?? 'free'),
+    };
+
+    // Client-side validation (OWASP A03)
+    if (body.password.length < 12) {
+      errorEl.textContent = 'Password must be at least 12 characters.';
+      errorEl.hidden = false;
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type=submit]') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account...';
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        errorEl.textContent = data.error ?? 'Something went wrong. Try again.';
+        errorEl.hidden = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+        return;
+      }
+
+      // Free: go straight to app. Paid: redirect to Stripe Checkout.
+      if (body.plan === 'free' || !data.checkoutUrl) {
+        window.location.href = '/app';
+      } else {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (err) {
+      errorEl.textContent = 'Network error. Try again.';
+      errorEl.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create account';
+    }
+  });
+
+  // Plan selection visual feedback
+  document.querySelectorAll<HTMLInputElement>('input[name=plan]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.plan-option').forEach((opt) => opt.classList.remove('plan-selected'));
+      radio.closest('.plan-option')?.classList.add('plan-selected');
+    });
+  });
+</script>
+
+<style>
+  .auth-page {
+    padding: var(--space-9) 0;
+    min-height: calc(100vh - 200px);
+  }
+  .auth-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+  .auth-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-7);
+  }
+  .auth-card h1 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-2);
+  }
+  .auth-sub {
+    color: var(--color-fg-muted);
+    margin-bottom: var(--space-6);
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field label { font-size: var(--text-sm); font-weight: 600; }
+  .field-hint { font-size: var(--text-xs); color: var(--color-fg-subtle); margin: 0; }
+
+  .plan-picker {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .plan-picker legend {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+  }
+  .plan-option {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .plan-option:hover { border-color: var(--color-accent); }
+  .plan-selected { border-color: var(--color-accent); background: rgba(0, 113, 227, 0.05); }
+  .plan-option input { width: auto; margin: 0; }
+  .plan-option strong { display: block; font-size: var(--text-sm); }
+  .plan-option span { font-size: var(--text-xs); color: var(--color-fg-muted); }
+  .plan-price {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+
+  .btn-full { width: 100%; }
+  .auth-foot {
+    text-align: center;
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+  .legal {
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--color-fg-subtle);
+    margin: 0;
+  }
+  .error {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(217, 45, 32, 0.1);
+    border: 1px solid rgba(217, 45, 32, 0.3);
+    color: var(--color-danger);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+</style>

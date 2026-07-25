@@ -1,0 +1,32 @@
+# Server
+node_modules/
+dist/
+.vercel/
+.astro/
+
+# Secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Test
+coverage/
+playwright-report/
+test-results/
+
+# Secrets scan
+.gitleaks.toml.local

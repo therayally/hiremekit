@@ -1,0 +1,45 @@
+# Gitleaks config — prevent secret commits (OWASP A02, SOC2 CC6.1)
+# https://github.com/gitleaks/gitleaks
+
+title = "HireMeKit secret scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "minimax-api-key"
+description = "MiniMax API key"
+regex = '''sk-(proj-)?[a-zA-Z0-9]{20,}'''
+tags = ["secret", "ai"]
+
+[[rules]]
+id = "stripe-secret-key"
+description = "Stripe secret key"
+regex = '''sk_(test|live)_[a-zA-Z0-9]{24,}'''
+tags = ["secret", "payment"]
+
+[[rules]]
+id = "stripe-webhook-secret"
+description = "Stripe webhook secret"
+regex = '''whsec_[a-zA-Z0-9]{24,}'''
+tags = ["secret", "payment"]
+
+[[rules]]
+id = "supabase-key"
+description = "Supabase key"
+regex = '''eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}'''
+tags = ["secret", "db"]
+
+[[rules]]
+id = "private-key"
+description = "PEM private key"
+regex = '''-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'''
+tags = ["secret", "crypto"]
+
+[allowlist]
+paths = [
+  '''node_modules''',
+  '''dist''',
+  '''.vercel''',
+  '''.env.example''',
+]

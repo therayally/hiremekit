@@ -1,0 +1,208 @@
+---
+/**
+ * BaseLayout. Apple-style chrome.
+ * No emojis. No third-party fonts. Privacy-respecting.
+ *
+ * Security headers applied via astro.config.mjs.
+ * Refer: docs/SECURITY.md
+ */
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = 'Everything you need to get hired. Resumes, cover letters, portfolios. $9.99 once.',
+  ogImage = '/og-default.png',
+  noIndex = false,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://hiremekit.app').toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="HireMeKit" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Favicon (placeholder) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+
+    <!-- Preconnect to Stripe -->
+    <link rel="preconnect" href="https://js.stripe.com" />
+  </head>
+  <body>
+    <nav class="site-nav">
+      <div class="container nav-inner">
+        <a href="/" class="nav-brand">HireMeKit</a>
+        <div class="nav-links">
+          <a href="/#features">Features</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/login" class="btn btn-ghost">Sign in</a>
+          <a href="/signup" class="btn btn-primary">Get started</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-grid">
+          <div>
+            <h4>HireMeKit</h4>
+            <p>Everything you need to get hired.</p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <ul>
+              <li><a href="/#features">Features</a></li>
+              <li><a href="/pricing">Pricing</a></li>
+              <li><a href="/signup">Get started</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Company</h4>
+            <ul>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+              <li><a href="/security">Security</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="/privacy">Privacy</a></li>
+              <li><a href="/terms">Terms</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 HireMeKit. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <style>
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid var(--color-border);
+      }
+      @media (prefers-color-scheme: dark) {
+        .site-nav {
+          background: rgba(0, 0, 0, 0.72);
+        }
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 56px;
+      }
+      .nav-brand {
+        font-weight: 600;
+        font-size: var(--text-base);
+        color: var(--color-fg);
+        letter-spacing: -0.02em;
+      }
+      .nav-brand:hover { text-decoration: none; }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+      }
+      .nav-links a:not(.btn) {
+        color: var(--color-fg);
+        font-size: var(--text-sm);
+        font-weight: 400;
+      }
+      .nav-links a:not(.btn):hover { text-decoration: none; color: var(--color-accent); }
+      @media (max-width: 640px) {
+        .nav-links a:not(.btn):not(.nav-brand) { display: none; }
+      }
+
+      .site-footer {
+        background: var(--color-bg-section);
+        padding: var(--space-8) 0 var(--space-5);
+        margin-top: var(--space-9);
+        border-top: 1px solid var(--color-border);
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: var(--space-7);
+        margin-bottom: var(--space-6);
+      }
+      @media (max-width: 768px) {
+        .footer-grid { grid-template-columns: 1fr 1fr; }
+      }
+      .footer-grid h4 {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--color-fg);
+        margin-bottom: var(--space-3);
+      }
+      .footer-grid p {
+        font-size: var(--text-sm);
+        color: var(--color-fg-muted);
+      }
+      .footer-grid ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .footer-grid li { margin-bottom: var(--space-2); }
+      .footer-grid a {
+        font-size: var(--text-sm);
+        color: var(--color-fg-muted);
+      }
+      .footer-grid a:hover { color: var(--color-accent); text-decoration: none; }
+      .footer-bottom {
+        border-top: 1px solid var(--color-border);
+        padding-top: var(--space-5);
+      }
+      .footer-bottom p {
+        font-size: var(--text-xs);
+        color: var(--color-fg-subtle);
+        margin: 0;
+      }
+    </style>
+  </body>
+</html>

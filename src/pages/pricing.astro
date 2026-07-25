@@ -1,0 +1,232 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const faqs = [
+  {
+    q: 'Is this really $9.99 once?',
+    a: 'Yes. Pay once, use forever. No subscription. No auto-renew. We make money on lifetime sales — not on charging you monthly for features you barely use.',
+  },
+  {
+    q: 'What is the difference between Pro and Studio?',
+    a: 'Pro gives you every resume, cover letter, and LinkedIn tool. Studio adds a portfolio website builder with free hosting, business card generator, and logo generator.',
+  },
+  {
+    q: 'How does resume tailoring work?',
+    a: 'You upload your resume and paste a job description. Our AI rewrites your bullets to mirror the job’s keywords, reorders sections for impact, and gives you a match score. Export as ATS-safe PDF, fancy PDF, or DOCX.',
+  },
+  {
+    q: 'Will this beat ATS systems?',
+    a: 'ATS systems score resumes on keyword match and formatting. We optimize for both: clean formatting that parses correctly, plus language that mirrors the job posting.',
+  },
+  {
+    q: 'Do you store my resume?',
+    a: 'Yes, encrypted, so you can come back and re-tailor it. We never sell your data, never share it with recruiters, and delete inactive accounts after 90 days. You can delete everything anytime.',
+  },
+  {
+    q: 'What if it does not help me?',
+    a: 'Thirty-day money-back guarantee. If you do not get more interviews after using HireMeKit, we refund you. No questions.',
+  },
+  {
+    q: 'Can I cancel Studio subscription?',
+    a: 'Yes. Cancel anytime, keep your portfolio until the end of the billing period. Or buy the $39 lifetime Studio and never think about it.',
+  },
+];
+---
+
+<BaseLayout
+  title="Pricing — HireMeKit"
+  description="Pay once, use forever. Free tier, Pro $9.99 lifetime, Studio $39 lifetime or $9/mo. No subscription traps."
+>
+  <section class="page-head">
+    <div class="container">
+      <h1>Pricing</h1>
+      <p>Pay once. Use forever. Cancel nothing.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-3 pricing-grid">
+        <article class="price-card">
+          <h3>Free</h3>
+          <div class="price"><span class="price-amount">$0</span></div>
+          <p class="price-desc">See your match score before you pay.</p>
+          <ul class="price-features">
+            <li>1 resume score</li>
+            <li>Top 5 missing keywords</li>
+            <li>No PDF export</li>
+            <li>Watermarked preview</li>
+          </ul>
+          <a href="/signup" class="btn btn-secondary btn-full">Start free</a>
+        </article>
+
+        <article class="price-card price-card-highlight">
+          <div class="price-badge">Most popular</div>
+          <h3>Pro</h3>
+          <div class="price">
+            <span class="price-amount">$9.99</span>
+            <span class="price-period">once</span>
+          </div>
+          <p class="price-desc">Everything you need to land the interview.</p>
+          <ul class="price-features">
+            <li>Unlimited resume tailoring</li>
+            <li>20 templates (ATS + artistic)</li>
+            <li>Cover letters, 3 lengths</li>
+            <li>Email signature generator</li>
+            <li>LinkedIn headline and About optimizer</li>
+            <li>Skills assessment</li>
+            <li>ATS PDF, Fancy PDF, DOCX export</li>
+          </ul>
+          <a href="/signup?plan=pro" class="btn btn-primary btn-full">Get Pro</a>
+        </article>
+
+        <article class="price-card">
+          <h3>Studio</h3>
+          <div class="price">
+            <span class="price-amount">$39</span>
+            <span class="price-period">once</span>
+          </div>
+          <p class="price-desc">Pro plus a portfolio site and design tools.</p>
+          <ul class="price-features">
+            <li>Everything in Pro</li>
+            <li>Portfolio site builder</li>
+            <li>Free hosting on hiremekit.app subdomain</li>
+            <li>Custom domain support</li>
+            <li>10 portfolio templates</li>
+            <li>Business card generator</li>
+            <li>Logo generator</li>
+            <li>Resume embed on portfolio</li>
+          </ul>
+          <a href="/signup?plan=studio" class="btn btn-secondary btn-full">Get Studio</a>
+          <p class="alt-pricing">Or <strong>$9/mo</strong> with cancel anytime.</p>
+        </article>
+      </div>
+      <p class="pricing-foot">All prices in USD. Lifetime access. 30-day money-back guarantee.</p>
+    </div>
+  </section>
+
+  <section class="section faq-section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Common questions</h2>
+      </div>
+      <div class="faq-list">
+        {faqs.map((f) => (
+          <details class="faq-item">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding: var(--space-9) 0 var(--space-6);
+    text-align: center;
+  }
+  .page-head p {
+    font-size: var(--text-lg);
+  }
+  .pricing-grid { align-items: stretch; }
+  .price-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .price-card-highlight {
+    border-color: var(--color-accent);
+    border-width: 2px;
+    box-shadow: var(--shadow-md);
+  }
+  .price-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-accent);
+    color: #fff;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+  }
+  .price-card h3 { margin-bottom: var(--space-3); }
+  .price {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: var(--space-3);
+  }
+  .price-amount {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .price-period { font-size: var(--text-sm); color: var(--color-fg-muted); }
+  .price-desc { font-size: var(--text-sm); margin-bottom: var(--space-5); }
+  .price-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-6);
+    flex: 1;
+  }
+  .price-features li {
+    font-size: var(--text-sm);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .price-features li:last-child { border-bottom: none; }
+  .btn-full { width: 100%; text-align: center; }
+  .alt-pricing {
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--color-fg-subtle);
+    margin: var(--space-3) 0 0;
+  }
+  .pricing-foot {
+    text-align: center;
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--color-fg-subtle);
+  }
+
+  .faq-section {
+    background: var(--color-bg-section);
+  }
+  .section-head { text-align: center; margin-bottom: var(--space-7); }
+  .faq-list {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .faq-item {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-5);
+    margin-bottom: var(--space-3);
+  }
+  .faq-item summary {
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--text-base);
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: '+';
+    float: right;
+    font-size: var(--text-lg);
+    color: var(--color-fg-muted);
+  }
+  .faq-item[open] summary::after { content: '−'; }
+  .faq-item p {
+    margin: var(--space-3) 0 0;
+    font-size: var(--text-sm);
+  }
+</style>
