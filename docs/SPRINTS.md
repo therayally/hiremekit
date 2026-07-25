@@ -2,32 +2,32 @@
 
 Sprints are scoped, shippable units. No time frames. Each Sprint ends with a deploy.
 
-## Sprint 0 — Foundation (in progress)
+## Sprint 0 — Foundation (shipped)
 - Repo + docs scaffolded
 - Security baseline documented (SOC2/ISO/OWASP)
 - Architecture documented
 - Brand guard profile created
 
-## Sprint 1 — Landing page
+## Sprint 1 — Landing page (shipped)
 - Apple-style hero
 - Feature grid
 - Pricing table ($9.99 / $39)
 - Signup form
 - SEO meta + OG tags
 
-## Sprint 2 — Auth + DB
-- Supabase setup (RLS on every table)
-- Sign up / sign in / sign out
-- Email verification
-- MFA stub (for Studio tier)
+## Sprint 2 — Auth (basic; full Supabase schema in Sprint 2.5)
+- Sign up / sign in / sign out endpoints (cookie-based)
+- Email verification — deferred
+- MFA stub — deferred
 
-## Sprint 3 — Resume engine + ingest
+## Sprint 3 — Resume engine + ingest (in progress)
 - Upload (PDF/DOCX/TXT)
-- Parse (pdf-parse, mammoth)
-- Tailor via MiniMax
-- Score via MiniMax
-- ATS PDF + Fancy PDF (Puppeteer)
-- DOCX export
+- Parse (pdfjs-dist for PDFs, mammoth for DOCX, AI for everything)
+- Heuristic PDF parser wrapped with AI fallback (architecture borrowed from open-resume, MIT)
+- JSON Resume adapter (round-trip with jsonresume.org standard)
+- AI structurer for: text, notes, voice, interview, JSON Resume, document text
+- /api/ingest endpoint with multipart + JSON branches
+- /app/resume page with 7-tab intake UI: file, text, voice, interview, notes, LinkedIn, JSON
 
 ### Ingest surface (Sprint 3.5 — extends Sprint 3)
 The "drop your stuff in" intake. The fastest possible path from "I have nothing prepared" to "I have a draft resume."
